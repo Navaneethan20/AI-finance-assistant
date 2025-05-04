@@ -1,0 +1,15 @@
+{
+  "name": "NIDZO - Personal Finance Manager",
+  "short_name": "NIDZO",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ],
+  "theme_color": "#0066ff",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/"
+}
