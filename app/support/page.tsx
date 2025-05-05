@@ -23,11 +23,7 @@ export default function SupportPage() {
               </p>
               <div className="relative max-w-xl mx-auto mt-6">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search for help articles..."
-                  className="pl-10 h-12 rounded-full"
-                />
+                <Input type="text" placeholder="Search for help articles..." className="pl-10 h-12 rounded-full" />
                 <Button className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full h-10">
                   Search
                 </Button>
@@ -162,6 +158,110 @@ export default function SupportPage() {
                     <Link href="#" className="p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors">
                       Managing multiple accounts
                     </Link>
-                    <Link href="#" className="p-4 bg-muted rounded-lg hover
+                    <Link href="#" className="p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors">
+                      Setting up budget alerts
+                    </Link>
+                  </div>
+                </div>
+              </TabsContent>
 
-\
+              <TabsContent value="contact">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Contact Our Support Team</CardTitle>
+                    <CardDescription>
+                      Fill out the form below and we'll get back to you as soon as possible.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form className="space-y-4">
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <label htmlFor="name" className="text-sm font-medium">
+                            Name
+                          </label>
+                          <Input id="name" placeholder="Your name" />
+                        </div>
+                        <div className="space-y-2">
+                          <label htmlFor="email" className="text-sm font-medium">
+                            Email
+                          </label>
+                          <Input id="email" type="email" placeholder="Your email" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label htmlFor="subject" className="text-sm font-medium">
+                          Subject
+                        </label>
+                        <Input id="subject" placeholder="How can we help you?" />
+                      </div>
+                      <div className="space-y-2">
+                        <label htmlFor="message" className="text-sm font-medium">
+                          Message
+                        </label>
+                        <textarea
+                          id="message"
+                          className="min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          placeholder="Please describe your issue or question in detail"
+                        />
+                      </div>
+                      <Button type="submit" className="w-full md:w-auto">
+                        Submit
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="faq">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Frequently Asked Questions</CardTitle>
+                    <CardDescription>Find answers to common questions about NIDZO</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                      <h3 className="font-medium">How do I connect my bank account?</h3>
+                      <p className="text-sm text-muted-foreground">
+                        NIDZO uses secure bank connections through our trusted partners. Go to Settings &gt; Linked
+                        Accounts and follow the prompts to connect your bank securely.
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="font-medium">Is my financial data secure?</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Yes, we use bank-level encryption and security measures to protect your data. We never store
+                        your bank credentials and use tokenized access for account connections.
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="font-medium">How do I cancel my subscription?</h3>
+                      <p className="text-sm text-muted-foreground">
+                        You can cancel your subscription at any time by going to Settings &gt; Subscription and clicking
+                        on "Cancel Subscription". Your access will continue until the end of your billing period.
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="font-medium">Can I export my financial data?</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Yes, you can export your data in CSV or PDF format from the Reports section. This allows you to
+                        keep records or use your data in other applications.
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="font-medium">How do I set up budget categories?</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Go to Budget &gt; Categories to set up and customize your budget categories. You can create new
+                        categories, edit existing ones, or use our recommended default categories.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </section>
+      </main>
+    </div>
+  )
+}

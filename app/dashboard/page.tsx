@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@/hooks/use-auth"
 import { AuthenticatedLayout } from "@/components/authenticated-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/loading-skeleton"
 import { QuickActionButtons } from "@/components/quick-action-buttons"
 import { motion } from "framer-motion"
@@ -17,7 +16,6 @@ export default function Dashboard() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [financialData, setFinancialData] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState("overview")
 
   useEffect(() => {
     const fetchData = async () => {
@@ -251,282 +249,188 @@ export default function Dashboard() {
           </motion.div>
         </div>
 
-        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid grid-cols-3 md:grid-cols-5 lg:w-[600px]">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="income">Income</TabsTrigger>
-            <TabsTrigger value="expenses">Expenses</TabsTrigger>
-            <TabsTrigger value="savings">Savings</TabsTrigger>
-            <TabsTrigger value="goals">Goals</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {loading ? (
-                <>
-                  <Skeleton className="h-[120px]" />
-                  <Skeleton className="h-[120px]" />
-                  <Skeleton className="h-[120px]" />
-                  <Skeleton className="h-[120px]" />
-                </>
-              ) : (
-                <>
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        className="h-4 w-4 text-muted-foreground"
-                      >
-                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                      </svg>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{formatCurrency(financialData?.totalBalance || 0)}</div>
-                      <p className="text-xs text-muted-foreground">
-                        {financialData?.balanceChange > 0 ? "+" : ""}
-                        {financialData?.balanceChange.toFixed(1) || 0}% from last month
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        className="h-4 w-4 text-muted-foreground"
-                      >
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                      </svg>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{formatCurrency(financialData?.monthlyIncome || 0)}</div>
-                      <p className="text-xs text-muted-foreground">
-                        {financialData?.incomeChange > 0 ? "+" : ""}
-                        {financialData?.incomeChange.toFixed(1) || 0}% from last month
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Monthly Expenses</CardTitle>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        className="h-4 w-4 text-muted-foreground"
-                      >
-                        <rect width="20" height="14" x="2" y="5" rx="2" />
-                        <path d="M2 10h20" />
-                      </svg>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{formatCurrency(financialData?.monthlyExpenses || 0)}</div>
-                      <p className="text-xs text-muted-foreground">
-                        {financialData?.expenseChange > 0 ? "+" : ""}
-                        {financialData?.expenseChange.toFixed(1) || 0}% from last month
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Savings Rate</CardTitle>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        className="h-4 w-4 text-muted-foreground"
-                      >
-                        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                      </svg>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{financialData?.savingsRate.toFixed(1) || 0}%</div>
-                      <p className="text-xs text-muted-foreground">
-                        {financialData?.savingsChange > 0 ? "+" : ""}
-                        {financialData?.savingsChange.toFixed(1) || 0}% from last month
-                      </p>
-                    </CardContent>
-                  </Card>
-                </>
-              )}
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-              <Card className="col-span-4">
-                <CardHeader>
-                  <CardTitle>Monthly Overview</CardTitle>
-                  <CardDescription>Your financial activity for the current month</CardDescription>
-                </CardHeader>
-                <CardContent className="pl-2">
-                  {loading ? (
-                    <Skeleton className="h-[300px]" />
-                  ) : (
-                    <div className="h-[300px]">
-                      {financialData?.expenseBreakdown && financialData.expenseBreakdown.length > 0 ? (
-                        <ExpenseBreakdownChart data={financialData.expenseBreakdown} title="" description="" />
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-muted-foreground">
-                          No expense data available
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-              <Card className="col-span-3">
-                <CardHeader>
-                  <CardTitle>Recent Transactions</CardTitle>
-                  <CardDescription>Your latest financial activities</CardDescription>
+        {/* Financial Overview Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {loading ? (
+            <>
+              <Skeleton className="h-[120px]" />
+              <Skeleton className="h-[120px]" />
+              <Skeleton className="h-[120px]" />
+              <Skeleton className="h-[120px]" />
+            </>
+          ) : (
+            <>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    className="h-4 w-4 text-muted-foreground"
+                  >
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                  </svg>
                 </CardHeader>
                 <CardContent>
-                  {loading ? (
-                    <div className="space-y-2">
-                      <Skeleton className="h-[40px]" />
-                      <Skeleton className="h-[40px]" />
-                      <Skeleton className="h-[40px]" />
-                      <Skeleton className="h-[40px]" />
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {(financialData?.recentTransactions || []).map((transaction: any, i: number) => (
-                        <div key={i} className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className={`w-2 h-2 rounded-full ${transaction.type === "expense" ? "bg-red-500" : "bg-green-500"}`}
-                            ></div>
-                            <div>
-                              <p className="text-sm font-medium">{transaction.description}</p>
-                              <p className="text-xs text-muted-foreground">{transaction.date}</p>
-                            </div>
-                          </div>
-                          <p
-                            className={`text-sm font-medium ${transaction.type === "expense" ? "text-red-500" : "text-green-500"}`}
-                          >
-                            {transaction.type === "expense" ? "-" : "+"}
-                            {formatCurrency(transaction.amount)}
-                          </p>
-                        </div>
-                      ))}
-                      {(financialData?.recentTransactions || []).length === 0 && (
-                        <div className="text-center py-4 text-muted-foreground">No recent transactions found</div>
-                      )}
-                    </div>
-                  )}
+                  <div className="text-2xl font-bold">{formatCurrency(financialData?.totalBalance || 0)}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {financialData?.balanceChange > 0 ? "+" : ""}
+                    {financialData?.balanceChange.toFixed(1) || 0}% from last month
+                  </p>
                 </CardContent>
               </Card>
-            </div>
-          </TabsContent>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    className="h-4 w-4 text-muted-foreground"
+                  >
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{formatCurrency(financialData?.monthlyIncome || 0)}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {financialData?.incomeChange > 0 ? "+" : ""}
+                    {financialData?.incomeChange.toFixed(1) || 0}% from last month
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Monthly Expenses</CardTitle>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    className="h-4 w-4 text-muted-foreground"
+                  >
+                    <rect width="20" height="14" x="2" y="5" rx="2" />
+                    <path d="M2 10h20" />
+                  </svg>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{formatCurrency(financialData?.monthlyExpenses || 0)}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {financialData?.expenseChange > 0 ? "+" : ""}
+                    {financialData?.expenseChange.toFixed(1) || 0}% from last month
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Savings Rate</CardTitle>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    className="h-4 w-4 text-muted-foreground"
+                  >
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                  </svg>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{financialData?.savingsRate.toFixed(1) || 0}%</div>
+                  <p className="text-xs text-muted-foreground">
+                    {financialData?.savingsChange > 0 ? "+" : ""}
+                    {financialData?.savingsChange.toFixed(1) || 0}% from last month
+                  </p>
+                </CardContent>
+              </Card>
+            </>
+          )}
+        </div>
 
-          <TabsContent value="income" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Income Analysis</CardTitle>
-                <CardDescription>Breakdown of your income sources</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <Skeleton className="h-[400px]" />
-                ) : (
-                  <div className="h-[400px]">
-                    {/* Income chart component would go here */}
+        {/* Main Content Area */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Expense Breakdown Chart */}
+          <Card className="md:col-span-1">
+            <CardHeader>
+              <CardTitle>Expense Breakdown</CardTitle>
+              <CardDescription>Your spending by category this month</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <Skeleton className="h-[400px]" />
+              ) : (
+                <div className="h-[400px]">
+                  {financialData?.expenseBreakdown && financialData.expenseBreakdown.length > 0 ? (
+                    <ExpenseBreakdownChart data={financialData.expenseBreakdown} title="" description="" />
+                  ) : (
                     <div className="flex items-center justify-center h-full text-muted-foreground">
-                      Income analysis visualization will appear here
+                      No expense data available
                     </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-          <TabsContent value="expenses" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Expense Analysis</CardTitle>
-                <CardDescription>Breakdown of your spending by category</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <Skeleton className="h-[400px]" />
-                ) : (
-                  <div className="h-[400px]">
-                    {financialData?.expenseBreakdown && financialData.expenseBreakdown.length > 0 ? (
-                      <ExpenseBreakdownChart data={financialData.expenseBreakdown} title="" description="" />
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-muted-foreground">
-                        No expense data available
+          {/* Recent Transactions */}
+          <Card className="md:col-span-1">
+            <CardHeader>
+              <CardTitle>Recent Transactions</CardTitle>
+              <CardDescription>Your latest financial activities</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-[40px]" />
+                  <Skeleton className="h-[40px]" />
+                  <Skeleton className="h-[40px]" />
+                  <Skeleton className="h-[40px]" />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {(financialData?.recentTransactions || []).map((transaction: any, i: number) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`w-2 h-2 rounded-full ${transaction.type === "expense" ? "bg-red-500" : "bg-green-500"}`}
+                        ></div>
+                        <div>
+                          <p className="text-sm font-medium">{transaction.description}</p>
+                          <p className="text-xs text-muted-foreground">{transaction.date}</p>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="savings" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Savings Analysis</CardTitle>
-                <CardDescription>Track your savings progress over time</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <Skeleton className="h-[400px]" />
-                ) : (
-                  <div className="h-[400px]">
-                    {/* Savings chart component would go here */}
-                    <div className="flex items-center justify-center h-full text-muted-foreground">
-                      Savings analysis visualization will appear here
+                      <p
+                        className={`text-sm font-medium ${transaction.type === "expense" ? "text-red-500" : "text-green-500"}`}
+                      >
+                        {transaction.type === "expense" ? "-" : "+"}
+                        {formatCurrency(transaction.amount)}
+                      </p>
                     </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="goals" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Financial Goals</CardTitle>
-                <CardDescription>Track progress towards your financial goals</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <Skeleton className="h-[400px]" />
-                ) : (
-                  <div className="h-[400px]">
-                    {/* Goals chart component would go here */}
-                    <div className="flex items-center justify-center h-full text-muted-foreground">
-                      Financial goals visualization will appear here
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                  ))}
+                  {(financialData?.recentTransactions || []).length === 0 && (
+                    <div className="text-center py-4 text-muted-foreground">No recent transactions found</div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </AuthenticatedLayout>
   )

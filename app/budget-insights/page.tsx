@@ -758,74 +758,7 @@ export default function BudgetInsights() {
               </motion.div>
 
               {/* Upcoming Bills - Dynamically generated based on categories */}
-              <motion.div initial="hidden" animate="visible" variants={fadeIn}>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5 text-primary" />
-                      Upcoming Bills
-                    </CardTitle>
-                    <CardDescription>Expected bills based on your spending patterns</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoading ? (
-                      <div className="space-y-4">
-                        <Skeleton className="h-16 w-full" />
-                        <Skeleton className="h-16 w-full" />
-                      </div>
-                    ) : getUpcomingBills().length > 0 ? (
-                      <div className="space-y-4">
-                        {getUpcomingBills().map((bill, index) => (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                            className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`h-10 w-10 rounded-full flex items-center justify-center ${
-                                  getDaysUntil(bill.dueDate) <= 3
-                                    ? "bg-red-100 text-red-600"
-                                    : "bg-blue-100 text-blue-600"
-                                }`}
-                              >
-                                <Clock className="h-5 w-5" />
-                              </div>
-                              <div>
-                                <h4 className="font-medium">{bill.name}</h4>
-                                <p className="text-sm text-muted-foreground">Due {formatDate(bill.dueDate)}</p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-semibold">₹{bill.amount.toLocaleString()}</p>
-                              <Badge
-                                variant={getDaysUntil(bill.dueDate) <= 3 ? "destructive" : "outline"}
-                                className="mt-1"
-                              >
-                                {getDaysUntil(bill.dueDate) <= 0
-                                  ? "Due today"
-                                  : `${getDaysUntil(bill.dueDate)} days left`}
-                              </Badge>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-6 text-center">
-                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
-                          <Info className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                        <h3 className="text-lg font-medium">No upcoming bills found</h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Add regular expenses to see your upcoming bills here
-                        </p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
+            
             </TabsContent>
 
             {/* Spending Breakdown Tab */}
