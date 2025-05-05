@@ -103,12 +103,6 @@ export function Navbar() {
                   <span>Budget Planning</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/features/reports" className="flex items-center gap-2 cursor-pointer">
-                  <FileText size={16} />
-                  <span>Financial Reports</span>
-                </Link>
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
