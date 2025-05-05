@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ref, uploadBytes, getDownloadURL, type StorageReference } from "firebase/storage"
+import { ref, uploadBytesResumable, getDownloadURL, type StorageReference } from "firebase/storage"
 import { storage } from "@/lib/firebase"
 import { useAuth } from "@/hooks/use-auth"
 
@@ -13,12 +13,14 @@ interface UseFirebaseStorageReturn {
   uploadFile: (file: File) => Promise<string>
   isUploading: boolean
   error: Error | null
+  uploadProgress: number
   storageRef: StorageReference | null
 }
 
 export function useFirebaseStorage({ path = "uploads" }: UseFirebaseStorageProps = {}): UseFirebaseStorageReturn {
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
+  const [uploadProgress, setUploadProgress] = useState(0)
   const [storageRef, setStorageRef] = useState<StorageReference | null>(null)
   const { user } = useAuth()
 
@@ -39,24 +41,46 @@ export function useFirebaseStorage({ path = "uploads" }: UseFirebaseStorageProps
 
     setIsUploading(true)
     setError(null)
+    setUploadProgress(0)
 
     try {
       // Create a reference to the file in the user's storage
       const fileRef = ref(storageRef, `${Date.now()}-${file.name}`)
 
-      // Upload the file
-      const snapshot = await uploadBytes(fileRef, file)
+      // Upload the file with progress tracking
+      const uploadTask = uploadBytesResumable(fileRef, file)
 
-      // Get the download URL
-      const downloadURL = await getDownloadURL(snapshot.ref)
-
-      return downloadURL
+      // Return a promise that resolves with the download URL
+      return new Promise((resolve, reject) => {
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+            setUploadProgress(progress)
+          },
+          (error) => {
+            setError(error as Error)
+            setIsUploading(false)
+            reject(error)
+          },
+          async () => {
+            try {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref)
+              setIsUploading(false)
+              resolve(downloadURL)
+            } catch (err) {
+              setError(err as Error)
+              setIsUploading(false)
+              reject(err)
+            }
+          },
+        )
+      })
     } catch (err) {
       const error = err as Error
       setError(error)
-      throw error
-    } finally {
       setIsUploading(false)
+      throw error
     }
   }
 
@@ -64,6 +88,7 @@ export function useFirebaseStorage({ path = "uploads" }: UseFirebaseStorageProps
     uploadFile,
     isUploading,
     error,
+    uploadProgress,
     storageRef,
   }
 }

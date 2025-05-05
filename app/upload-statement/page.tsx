@@ -4,31 +4,41 @@ import type React from "react"
 
 import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Upload, FileText, AlertCircle, CheckCircle, ArrowLeft } from "lucide-react"
+import { Upload, FileText, AlertCircle, CheckCircle, ArrowLeft, FileType } from "lucide-react"
 import { AuthenticatedLayout } from "@/components/authenticated-layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/hooks/use-auth"
-import { uploadFile } from "@/hooks/use-firebase-storage"
-import { processCSV } from "@/lib/consolidated-csv-service"
+import { useFirebaseStorage } from "@/hooks/use-firebase-storage"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { motion } from "framer-motion"
 
 export default function UploadStatementPage() {
   const [file, setFile] = useState<File | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [uploadProgress, setUploadProgress] = useState(0)
+  const [processingResults, setProcessingResults] = useState<any>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const { user } = useAuth()
+  const { uploadFile, isUploading, uploadProgress } = useFirebaseStorage({ path: "statements" })
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
-      if (selectedFile.type !== "text/csv" && !selectedFile.name.endsWith(".csv")) {
-        setError("Please upload a CSV file")
+      // Check if file is CSV or PDF
+      const fileType = selectedFile.type
+      const fileName = selectedFile.name.toLowerCase()
+
+      if (
+        !(
+          fileType === "text/csv" ||
+          fileName.endsWith(".csv") ||
+          fileType === "application/pdf" ||
+          fileName.endsWith(".pdf")
+        )
+      ) {
+        setError("Please upload a CSV or PDF file")
         setFile(null)
         if (fileInputRef.current) {
           fileInputRef.current.value = ""
@@ -52,35 +62,49 @@ export default function UploadStatementPage() {
     }
 
     try {
-      setIsUploading(true)
       setError(null)
       setSuccess(null)
+      setProcessingResults(null)
 
       // Upload file to Firebase Storage
-      const uploadPath = `statements/${user.uid}/${file.name}`
-      const downloadURL = await uploadFile(file, uploadPath, (progress) => setUploadProgress(progress))
+      const downloadURL = await uploadFile(file)
 
       if (!downloadURL) {
         throw new Error("Failed to upload file")
       }
 
-      // Process the CSV file
-      const result = await processCSV(file, user.uid)
+      // Create form data for API request
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("user_id", user.uid)
+      formData.append("file_url", downloadURL)
+
+      // Send to statement processing API
+      const response = await fetch("https://csv-convert-api.onrender.com/process-statement", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.detail || "Failed to process statement")
+      }
+
+      const result = await response.json()
+      setProcessingResults(result)
 
       if (result.success) {
-        setSuccess("Statement uploaded and processed successfully!")
+        setSuccess(`Statement processed successfully! Found ${result.transactions?.length || 0} transactions.`)
         setTimeout(() => {
           router.push("/transactions")
-        }, 2000)
+        }, 3000)
       } else {
-        throw new Error(result.error || "Failed to process CSV file")
+        throw new Error(result.message || "Failed to process statement")
       }
     } catch (err) {
       console.error("Upload error:", err)
       setError(err instanceof Error ? err.message : "An unknown error occurred")
     } finally {
-      setIsUploading(false)
-      setUploadProgress(0)
       if (fileInputRef.current) {
         fileInputRef.current.value = ""
       }
@@ -94,7 +118,7 @@ export default function UploadStatementPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Upload Bank Statement</h1>
-            <p className="text-muted-foreground">Import your transactions by uploading a bank statement CSV file</p>
+            <p className="text-muted-foreground">Import your transactions by uploading a bank statement file</p>
           </div>
           <Button variant="outline" onClick={() => router.back()} className="flex items-center gap-2">
             <ArrowLeft size={16} />
@@ -111,7 +135,7 @@ export default function UploadStatementPage() {
                   Upload Statement
                 </CardTitle>
                 <CardDescription>
-                  Upload your bank statement in CSV format to automatically import your transactions
+                  Upload your bank statement in CSV or PDF format to automatically import your transactions
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -126,7 +150,11 @@ export default function UploadStatementPage() {
                 >
                   <div className="flex flex-col items-center justify-center gap-4">
                     <div className="rounded-full bg-primary/10 p-3">
-                      <FileText className="h-6 w-6 text-primary" />
+                      {file?.type === "application/pdf" || file?.name.toLowerCase().endsWith(".pdf") ? (
+                        <FileType className="h-6 w-6 text-primary" />
+                      ) : (
+                        <FileText className="h-6 w-6 text-primary" />
+                      )}
                     </div>
                     <div className="text-center">
                       <p className="font-medium">
@@ -138,7 +166,7 @@ export default function UploadStatementPage() {
                           </span>
                         )}
                       </p>
-                      <p className="text-sm text-muted-foreground mt-1">CSV files only (max 10MB)</p>
+                      <p className="text-sm text-muted-foreground mt-1">CSV or PDF files only (max 10MB)</p>
                     </div>
                     {file && (
                       <div className="flex items-center gap-2 text-sm text-primary">
@@ -150,7 +178,7 @@ export default function UploadStatementPage() {
                   <input
                     id="file-upload"
                     type="file"
-                    accept=".csv"
+                    accept=".csv,.pdf"
                     className="hidden"
                     onChange={handleFileChange}
                     ref={fileInputRef}
@@ -162,7 +190,7 @@ export default function UploadStatementPage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="font-medium">Uploading...</span>
-                      <span className="text-primary font-medium">{uploadProgress}%</span>
+                      <span className="text-primary font-medium">{Math.round(uploadProgress)}%</span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
                       <div
@@ -184,6 +212,17 @@ export default function UploadStatementPage() {
                   <div className="flex items-center gap-2 text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400 p-3 rounded-md text-sm">
                     <CheckCircle className="h-4 w-4" />
                     {success}
+                  </div>
+                )}
+
+                {processingResults && (
+                  <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                    <h4 className="font-medium text-blue-700 dark:text-blue-400 mb-2">Processing Results</h4>
+                    <div className="space-y-2 text-sm">
+                      <p>Total Transactions: {processingResults.transactions?.length || 0}</p>
+                      <p>Expenses: {processingResults.stats?.expenses_count || 0}</p>
+                      <p>Income: {processingResults.stats?.income_count || 0}</p>
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -212,52 +251,56 @@ export default function UploadStatementPage() {
           >
             <Card>
               <CardHeader>
-                <CardTitle>CSV Format Guidelines</CardTitle>
-                <CardDescription>For the best results, ensure your CSV file has the following columns</CardDescription>
+                <CardTitle>Supported File Formats</CardTitle>
+                <CardDescription>We support the following file formats and bank statements</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="py-2 px-4 text-left font-medium text-muted-foreground">Column</th>
-                        <th className="py-2 px-4 text-left font-medium text-muted-foreground">Description</th>
-                        <th className="py-2 px-4 text-left font-medium text-muted-foreground">Example</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      <tr>
-                        <td className="py-2 px-4 font-medium">Date</td>
-                        <td className="py-2 px-4 text-muted-foreground">Transaction date (DD/MM/YYYY)</td>
-                        <td className="py-2 px-4 text-muted-foreground">15/04/2023</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 px-4 font-medium">Description</td>
-                        <td className="py-2 px-4 text-muted-foreground">Transaction description</td>
-                        <td className="py-2 px-4 text-muted-foreground">Grocery Shopping</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 px-4 font-medium">Amount</td>
-                        <td className="py-2 px-4 text-muted-foreground">Transaction amount</td>
-                        <td className="py-2 px-4 text-muted-foreground">2500.00</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 px-4 font-medium">Type</td>
-                        <td className="py-2 px-4 text-muted-foreground">Credit or Debit</td>
-                        <td className="py-2 px-4 text-muted-foreground">Debit</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 px-4 font-medium">Category</td>
-                        <td className="py-2 px-4 text-muted-foreground">Transaction category (optional)</td>
-                        <td className="py-2 px-4 text-muted-foreground">Groceries</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="font-medium mb-2">CSV Files</h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="py-2 px-4 text-left font-medium text-muted-foreground">Column</th>
+                            <th className="py-2 px-4 text-left font-medium text-muted-foreground">Description</th>
+                            <th className="py-2 px-4 text-left font-medium text-muted-foreground">Example</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                          <tr>
+                            <td className="py-2 px-4 font-medium">Date</td>
+                            <td className="py-2 px-4 text-muted-foreground">Transaction date</td>
+                            <td className="py-2 px-4 text-muted-foreground">15/04/2023</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 px-4 font-medium">Description</td>
+                            <td className="py-2 px-4 text-muted-foreground">Transaction description</td>
+                            <td className="py-2 px-4 text-muted-foreground">Grocery Shopping</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 px-4 font-medium">Amount</td>
+                            <td className="py-2 px-4 text-muted-foreground">Transaction amount</td>
+                            <td className="py-2 px-4 text-muted-foreground">2500.00</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-medium mb-2">PDF Files</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      We can extract transactions from PDF bank statements. For best results:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+                      <li>Use official bank statements (not screenshots)</li>
+                      <li>Ensure the PDF is not password protected</li>
+                      <li>Make sure the PDF contains transaction details in a tabular format</li>
+                      <li>Text in the PDF should be selectable (not scanned images)</li>
+                    </ul>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground mt-4">
-                  Note: If your CSV doesn't match this format exactly, our system will attempt to map the columns
-                  automatically.
-                </p>
               </CardContent>
             </Card>
           </motion.div>
