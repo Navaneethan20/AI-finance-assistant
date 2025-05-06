@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/hooks/use-auth"
 import { useFirebaseStorage } from "@/hooks/use-firebase-storage"
-import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { motion } from "framer-motion"
+import { CustomLoader } from "@/components/ui/custom-loader"
 
 export default function UploadStatementPage() {
   const [file, setFile] = useState<File | null>(null)
@@ -187,18 +187,32 @@ export default function UploadStatementPage() {
                 </div>
 
                 {isUploading && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium">Uploading...</span>
-                      <span className="text-primary font-medium">{Math.round(uploadProgress)}%</span>
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-primary/5 border border-primary/20 rounded-lg p-6 space-y-4"
+                  >
+                    <div className="flex items-center justify-center">
+                      <CustomLoader
+                        type="sparkles"
+                        text={`Uploading and processing your statement (${Math.round(uploadProgress)}%)`}
+                      />
                     </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div
-                        className="bg-primary h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${uploadProgress}%` }}
-                      ></div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium">Uploading...</span>
+                        <span className="text-primary font-medium">{Math.round(uploadProgress)}%</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2">
+                        <motion.div
+                          className="bg-primary h-2 rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${uploadProgress}%` }}
+                          transition={{ duration: 0.3 }}
+                        ></motion.div>
+                      </div>
                     </div>
-                  </div>
+                  </motion.div>
                 )}
 
                 {error && (
@@ -209,10 +223,29 @@ export default function UploadStatementPage() {
                 )}
 
                 {success && (
-                  <div className="flex items-center gap-2 text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400 p-3 rounded-md text-sm">
-                    <CheckCircle className="h-4 w-4" />
-                    {success}
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-4 rounded-md flex flex-col items-center gap-3"
+                  >
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1, rotate: [0, 10, -10, 0] }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
+                    >
+                      <CheckCircle className="h-8 w-8" />
+                    </motion.div>
+                    <p className="text-center">{success}</p>
+                    <div className="w-full bg-green-200 dark:bg-green-700/20 rounded-full h-1 mt-2">
+                      <motion.div
+                        className="bg-green-500 h-1 rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: "100%" }}
+                        transition={{ duration: 3 }}
+                      ></motion.div>
+                    </div>
+                    <p className="text-xs">Redirecting to transactions page...</p>
+                  </motion.div>
                 )}
 
                 {processingResults && (
@@ -227,10 +260,14 @@ export default function UploadStatementPage() {
                 )}
               </CardContent>
               <CardFooter>
-                <Button onClick={handleUpload} disabled={!file || isUploading} className="w-full">
+                <Button
+                  onClick={handleUpload}
+                  disabled={!file || isUploading}
+                  className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary"
+                >
                   {isUploading ? (
                     <span className="flex items-center gap-2">
-                      <LoadingSpinner size="sm" />
+                      <CustomLoader type="wave" size="sm" />
                       Processing...
                     </span>
                   ) : (

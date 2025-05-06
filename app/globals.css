@@ -24,6 +24,23 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
+
+    /* New color combinations */
+    --gradient-primary: linear-gradient(to right, hsl(var(--primary)), hsl(var(--primary) / 0.8));
+    --gradient-success: linear-gradient(to right, hsl(142, 71%, 45%), hsl(142, 64%, 38%));
+    --gradient-danger: linear-gradient(to right, hsl(0, 84%, 60%), hsl(0, 72%, 51%));
+    --gradient-warning: linear-gradient(to right, hsl(38, 92%, 50%), hsl(31, 89%, 45%));
+    --gradient-info: linear-gradient(to right, hsl(199, 89%, 48%), hsl(201, 79%, 40%));
+
+    /* New shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
+
+    /* Color scheme specific variables */
+    --selected-scheme: var(--primary);
+    --selected-scheme-foreground: var(--primary-foreground);
   }
 
   .dark {
@@ -46,7 +63,42 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 24 100% 50%;
+
+    /* Updated gradients for dark mode */
+    --gradient-primary: linear-gradient(to right, hsl(var(--primary)), hsl(var(--primary) / 0.7));
+    --gradient-success: linear-gradient(to right, hsl(143, 55%, 42%), hsl(143, 43%, 36%));
+    --gradient-danger: linear-gradient(to right, hsl(0, 65%, 55%), hsl(0, 53%, 45%));
+    --gradient-warning: linear-gradient(to right, hsl(38, 82%, 45%), hsl(31, 77%, 40%));
+    --gradient-info: linear-gradient(to right, hsl(199, 80%, 45%), hsl(201, 70%, 37%));
   }
+}
+
+.color-scheme-green {
+  --primary: 151 49% 46%;
+  --primary-foreground: 0 0% 100%;
+  --selected-scheme: 151 49% 46%;
+  --selected-scheme-foreground: 0 0% 100%;
+}
+
+.color-scheme-purple {
+  --primary: 262 87% 53%;
+  --primary-foreground: 0 0% 100%;
+  --selected-scheme: 262 87% 53%;
+  --selected-scheme-foreground: 0 0% 100%;
+}
+
+.color-scheme-teal {
+  --primary: 180 100% 34%;
+  --primary-foreground: 0 0% 100%;
+  --selected-scheme: 180 100% 34%;
+  --selected-scheme-foreground: 0 0% 100%;
+}
+
+.color-scheme-orange {
+  --primary: 30 95% 52%;
+  --primary-foreground: 0 0% 100%;
+  --selected-scheme: 30 95% 52%;
+  --selected-scheme-foreground: 0 0% 100%;
 }
 
 @layer base {
@@ -189,4 +241,59 @@
 /* Gradient text */
 .gradient-text {
   @apply bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent dark:from-orange-400 dark:to-orange-600;
+}
+
+/* New utility classes for gradients */
+.bg-gradient-primary {
+  background-image: var(--gradient-primary);
+}
+
+.bg-gradient-success {
+  background-image: var(--gradient-success);
+}
+
+.bg-gradient-danger {
+  background-image: var(--gradient-danger);
+}
+
+.bg-gradient-warning {
+  background-image: var(--gradient-warning);
+}
+
+.bg-gradient-info {
+  background-image: var(--gradient-info);
+}
+
+/* Enhanced hover effects */
+.hover-lift {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Enhanced card styles */
+.card-gradient {
+  background-image: linear-gradient(to bottom right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Enhanced transition for all interactive elements */
+button,
+a,
+input,
+select,
+textarea {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Enhanced focus styles across the application */
+*:focus-visible {
+  outline: 2px solid hsl(var(--selected-scheme));
+  outline-offset: 2px;
 }

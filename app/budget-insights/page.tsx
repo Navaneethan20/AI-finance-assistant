@@ -37,6 +37,7 @@ import {
 } from "lucide-react"
 import { collection, query, where, getDocs, orderBy, onSnapshot, doc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
+import { CustomLoader } from "@/components/ui/custom-loader"
 
 // Animation variants for elements
 const fadeIn = {
@@ -502,8 +503,17 @@ export default function BudgetInsights() {
               disabled={isLoading || isRefreshing}
               className="flex items-center gap-1"
             >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-              {isRefreshing ? "Refreshing..." : "Refresh"}
+              {isRefreshing ? (
+                <>
+                  <CustomLoader type="spinner" size="sm" />
+                  <span>Refreshing...</span>
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4" />
+                  <span>Refresh</span>
+                </>
+              )}
             </Button>
 
             <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-1">
@@ -566,13 +576,22 @@ export default function BudgetInsights() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <AnimatePresence>
                   {isLoading ? (
-                    <>
-                      <Skeleton className="h-24 w-full" />
-                      <Skeleton className="h-24 w-full" />
-                      <Skeleton className="h-24 w-full" />
-                    </>
+                    <motion.div
+                      className="flex flex-col items-center justify-center py-12 space-y-6"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                    >
+                      <CustomLoader type="dots" size="lg" text="Analyzing your financial data..." />
+                      <div className="text-center max-w-md">
+                        <h3 className="text-lg font-medium mb-2">Crunching the numbers</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Our AI is analyzing your financial patterns and preparing personalized insights.
+                        </p>
+                      </div>
+                    </motion.div>
                   ) : (
                     <>
+                      {/* Existing metrics display */}
                       <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -675,12 +694,16 @@ export default function BudgetInsights() {
               <div className="grid gap-6 md:grid-cols-2">
                 {/* AI Model Charts */}
                 {isLoading ? (
-                  <>
-                    <Skeleton className="h-[400px] w-full" />
-                    <Skeleton className="h-[400px] w-full" />
-                  </>
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <Card className="flex items-center justify-center h-[400px]">
+                      <CustomLoader type="skeleton" text="Loading expense distribution..." />
+                    </Card>
+                    <Card className="flex items-center justify-center h-[400px]">
+                      <CustomLoader type="skeleton" text="Loading income vs expenses chart..." />
+                    </Card>
+                  </div>
                 ) : (
-                  <>
+                  <div className="grid gap-6 md:grid-cols-2">
                     {renderModelChart(
                       aiData?.charts?.pieChart,
                       "Expense Distribution",
@@ -692,7 +715,7 @@ export default function BudgetInsights() {
                       "Income vs Expenses",
                       <LineChart className="h-4 w-4" />,
                     )}
-                  </>
+                  </div>
                 )}
               </div>
 
@@ -758,7 +781,74 @@ export default function BudgetInsights() {
               </motion.div>
 
               {/* Upcoming Bills - Dynamically generated based on categories */}
-            
+              <motion.div initial="hidden" animate="visible" variants={fadeIn}>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-primary" />
+                      Upcoming Bills
+                    </CardTitle>
+                    <CardDescription>Expected bills based on your spending patterns</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoading ? (
+                      <div className="space-y-4">
+                        <Skeleton className="h-16 w-full" />
+                        <Skeleton className="h-16 w-full" />
+                      </div>
+                    ) : getUpcomingBills().length > 0 ? (
+                      <div className="space-y-4">
+                        {getUpcomingBills().map((bill, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                            className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                                  getDaysUntil(bill.dueDate) <= 3
+                                    ? "bg-red-100 text-red-600"
+                                    : "bg-blue-100 text-blue-600"
+                                }`}
+                              >
+                                <Clock className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <h4 className="font-medium">{bill.name}</h4>
+                                <p className="text-sm text-muted-foreground">Due {formatDate(bill.dueDate)}</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold">₹{bill.amount.toLocaleString()}</p>
+                              <Badge
+                                variant={getDaysUntil(bill.dueDate) <= 3 ? "destructive" : "outline"}
+                                className="mt-1"
+                              >
+                                {getDaysUntil(bill.dueDate) <= 0
+                                  ? "Due today"
+                                  : `${getDaysUntil(bill.dueDate)} days left`}
+                              </Badge>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-6 text-center">
+                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
+                          <Info className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <h3 className="text-lg font-medium">No upcoming bills found</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Add regular expenses to see your upcoming bills here
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
             </TabsContent>
 
             {/* Spending Breakdown Tab */}
