@@ -12,7 +12,8 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
   experimental: {
-    optimizeCss: true,
+    // Remove optimizeCss or set it to false if you don't want to use it
+    // optimizeCss: true,
     optimizePackageImports: ['lucide-react'],
   },
   webpack: (config, { isServer }) => {
