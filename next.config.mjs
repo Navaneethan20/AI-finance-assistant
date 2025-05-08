@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  swcMinify: true,
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -12,8 +13,8 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
   experimental: {
-    // Remove optimizeCss or set it to false if you don't want to use it
-    // optimizeCss: true,
+    // Disable experimental CSS optimization until critters is properly set up
+    // optimizeCss: true
     optimizePackageImports: ['lucide-react'],
   },
   webpack: (config, { isServer }) => {
