@@ -1,71 +1,47 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState, useRef } from "react"
-import { usePathname, useSearchParams } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
-import { PageLoader } from "@/components/ui/page-loader"
 
-export function PageTransition({ children }: { children: React.ReactNode }) {
+import { motion } from "framer-motion"
+import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
+import { UnifiedLoader } from "@/components/ui/unified-loader"
+
+interface PageTransitionProps {
+  children: React.ReactNode
+}
+
+export function PageTransition({ children }: PageTransitionProps) {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
-  const [content, setContent] = useState(children)
 
-  // Use refs to track actual navigation changes vs. re-renders
-  const previousPathRef = useRef(pathname)
-  const previousSearchParamsRef = useRef(searchParams)
-
-  // Track route changes to trigger loading state
+  // Reset loading state when pathname changes
   useEffect(() => {
-    // Only trigger animation on actual route changes, not on re-renders or input changes
-    const isActualNavigation = previousPathRef.current !== pathname || previousSearchParamsRef.current !== searchParams
+    const timeout = setTimeout(() => {
+      setIsLoading(false)
+    }, 500)
 
-    if (isActualNavigation) {
-      setIsLoading(true)
-
-      // Store the current children
-      setContent(children)
-
-      // Set a timeout to simulate loading
-      const timer = setTimeout(() => {
-        setIsLoading(false)
-      }, 500) // 0.5 second delay
-
-      // Update refs
-      previousPathRef.current = pathname
-      previousSearchParamsRef.current = searchParams
-
-      return () => clearTimeout(timer)
-    } else {
-      // For non-navigation updates, just update content without animation
-      setContent(children)
-    }
-  }, [pathname, searchParams, children])
+    return () => clearTimeout(timeout)
+  }, [pathname])
 
   return (
-    <AnimatePresence mode="wait">
-      {isLoading ? (
-        <motion.div
-          key="loader"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <PageLoader message="Loading..." />
-        </motion.div>
-      ) : (
-        <motion.div
-          key="content"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-        >
-          {content}
-        </motion.div>
+    <>
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <UnifiedLoader size="lg" text="Changing page..." />
+        </div>
       )}
-    </AnimatePresence>
+
+      <motion.div
+        key={pathname}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        className="min-h-full"
+      >
+        {children}
+      </motion.div>
+    </>
   )
 }

@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/auth-context"
 import { useRouter } from "next/navigation"
 import { PageLoader } from "@/components/ui/page-loader"
+import { AnimatePresence } from "framer-motion"
 import type React from "react"
 
 interface AuthenticatedLayoutProps {
@@ -71,7 +72,7 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
       <div className="flex flex-1">
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
@@ -79,7 +80,9 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
           className={cn("flex-1 transition-all duration-300 ease-in-out", isSidebarOpen && !isMobile ? "lg:ml-64" : "")}
         >
           <div className="container mx-auto px-4 py-6 min-h-[calc(100vh-4rem-4rem)]">
-            <PageTransition>{children}</PageTransition>
+            <AnimatePresence mode="wait">
+              <PageTransition>{children}</PageTransition>
+            </AnimatePresence>
           </div>
           <Footer />
         </main>
