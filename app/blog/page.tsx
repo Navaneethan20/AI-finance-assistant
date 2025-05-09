@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { motion } from "framer-motion"
 
-// Sample blog posts data
+// Sample blog posts data with images
 const blogPosts = [
   {
     id: 1,
@@ -15,7 +15,7 @@ const blogPosts = [
     author: "Rahul Sharma",
     category: "Financial Planning",
     readTime: "5 min read",
-    image: "/placeholder.svg?height=200&width=400",
+    image: "/blog/financial-planning.png",
   },
   {
     id: 2,
@@ -26,7 +26,7 @@ const blogPosts = [
     author: "Priya Patel",
     category: "Investments",
     readTime: "8 min read",
-    image: "/placeholder.svg?height=200&width=400",
+    image: "/blog/investments.png",
   },
   {
     id: 3,
@@ -37,7 +37,7 @@ const blogPosts = [
     author: "Amit Kumar",
     category: "Budgeting",
     readTime: "6 min read",
-    image: "/placeholder.svg?height=200&width=400",
+    image: "/blog/budgeting.png",
   },
   {
     id: 4,
@@ -48,7 +48,7 @@ const blogPosts = [
     author: "Neha Gupta",
     category: "Taxation",
     readTime: "7 min read",
-    image: "/placeholder.svg?height=200&width=400",
+    image: "/blog/taxation.png",
   },
   {
     id: 5,
@@ -58,7 +58,7 @@ const blogPosts = [
     author: "Vikram Singh",
     category: "Investments",
     readTime: "4 min read",
-    image: "/placeholder.svg?height=200&width=400",
+    image: "/blog/compound-interest.png",
   },
   {
     id: 6,
@@ -68,7 +68,7 @@ const blogPosts = [
     author: "Ananya Desai",
     category: "Savings",
     readTime: "5 min read",
-    image: "/placeholder.svg?height=200&width=400",
+    image: "/blog/emergency-fund.png",
   },
 ]
 
@@ -113,7 +113,7 @@ export default function BlogPage() {
                 <div className="md:flex">
                   <div className="md:w-1/2">
                     <img
-                      src="/placeholder.svg?height=400&width=600"
+                      src="/blog/featured-post.png"
                       alt="Featured post"
                       className="w-full h-64 md:h-full object-cover"
                     />

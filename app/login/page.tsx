@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/contexts/auth-context"
 import { StatusMessage } from "@/components/ui/status-message"
 import { PageLoader } from "@/components/ui/page-loader"
+import { getAIAnalysis } from "@/lib/ai-model-integration"
 import { z } from "zod"
 import { motion } from "framer-motion"
 
@@ -67,6 +68,19 @@ export default function Login() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  // Function to trigger AI analysis after login
+  const triggerAIAnalysis = async (userId: string) => {
+    try {
+      // Trigger AI analysis in the background
+      await getAIAnalysis(userId, true)
+      console.log("AI analysis triggered after login")
+    } catch (error) {
+      console.error("Error triggering AI analysis:", error)
+      // Don't show error to user as this is a background task
+    }
+  }
+
+  // Update the handleSubmit function to ensure AI analysis is triggered right after login
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
@@ -77,11 +91,25 @@ export default function Login() {
 
     try {
       setIsLoading(true)
-      await signIn(formData.email, formData.password)
+      const userCredential = await signIn(formData.email, formData.password)
+
+      // Trigger AI analysis immediately after successful login
+      if (userCredential?.user?.uid) {
+        // Set loading state for AI analysis
+        toast({
+          title: "Analyzing your data",
+          description: "We're analyzing your financial data to provide personalized insights.",
+        })
+
+        // Force refresh the AI analysis
+        triggerAIAnalysis(userCredential.user.uid)
+      }
+
       toast({
         title: "Success",
         description: "You have been logged in successfully",
       })
+
       router.push("/dashboard")
     } catch (error) {
       console.error("Login error:", error)
@@ -91,15 +119,30 @@ export default function Login() {
     }
   }
 
+  // Similarly update the handleGoogleSignIn function
   const handleGoogleSignIn = async () => {
     try {
       setIsGoogleLoading(true)
       setError("")
-      await signInWithGoogle()
+      const userCredential = await signInWithGoogle()
+
+      // Trigger AI analysis immediately after successful Google login
+      if (userCredential?.user?.uid) {
+        // Set loading state for AI analysis
+        toast({
+          title: "Analyzing your data",
+          description: "We're analyzing your financial data to provide personalized insights.",
+        })
+
+        // Force refresh the AI analysis
+        triggerAIAnalysis(userCredential.user.uid)
+      }
+
       toast({
         title: "Success",
         description: "You have been logged in successfully with Google",
       })
+
       router.push("/dashboard")
     } catch (error) {
       console.error("Google login error:", error)

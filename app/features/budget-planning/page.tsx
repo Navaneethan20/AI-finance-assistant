@@ -10,18 +10,18 @@ export default function BudgetPlanningPage() {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="py-20 md:py-28 bg-gradient-to-b from-white to-blue-50">
+        {/* Hero Section - Enhanced for dark mode */}
+        <section className="py-20 md:py-28 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-800 dark:via-gray-850 dark:text-white">
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="space-y-4">
-                <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm text-primary">
+                <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm text-primary dark:bg-primary/20">
                   Budget Planning
                 </div>
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                   Smart Budget Planning for Financial Success
                 </h1>
-                <p className="text-muted-foreground md:text-xl">
+                <p className="text-muted-foreground md:text-xl dark:text-gray-300">
                   Create personalized budgets, set realistic goals, and stay on track with our intelligent budget
                   planning tools.
                 </p>
@@ -32,64 +32,68 @@ export default function BudgetPlanningPage() {
                     </Button>
                   </Link>
                   <Link href="/dashboard">
-                    <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="w-full sm:w-auto dark:border-gray-700 dark:text-gray-200"
+                    >
                       View Demo
                     </Button>
                   </Link>
                 </div>
               </div>
               <div className="relative lg:pl-10">
-                <div className="relative mx-auto aspect-video overflow-hidden rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 p-2 shadow-lg md:p-8 animate-float">
-                  <div className="absolute inset-0 bg-white/40 backdrop-blur-sm rounded-lg"></div>
+                <div className="relative mx-auto aspect-video overflow-hidden rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 p-2 shadow-lg md:p-8 animate-float">
+                  <div className="absolute inset-0 bg-white/40 backdrop-blur-sm rounded-lg dark:bg-gray-900/40"></div>
                   <div className="relative z-10 flex flex-col gap-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
                           <Target className="h-4 w-4" />
                         </div>
-                        <span className="font-semibold text-primary">Budget Overview</span>
+                        <span className="font-semibold text-primary dark:text-primary-foreground">Budget Overview</span>
                       </div>
                     </div>
 
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Housing</span>
-                        <span className="text-sm font-medium">₹15,000 / ₹18,000</span>
+                        <span className="text-sm text-muted-foreground dark:text-gray-300">Housing</span>
+                        <span className="text-sm font-medium dark:text-white">₹15,000 / ₹18,000</span>
                       </div>
-                      <div className="h-2 w-full rounded-full bg-primary/10">
+                      <div className="h-2 w-full rounded-full bg-primary/10 dark:bg-primary/5">
                         <div className="h-full rounded-full bg-green-500" style={{ width: "83%" }}></div>
                       </div>
 
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Food & Dining</span>
-                        <span className="text-sm font-medium">₹12,500 / ₹10,000</span>
+                        <span className="text-sm text-muted-foreground dark:text-gray-300">Food & Dining</span>
+                        <span className="text-sm font-medium dark:text-white">₹12,500 / ₹10,000</span>
                       </div>
-                      <div className="h-2 w-full rounded-full bg-primary/10">
+                      <div className="h-2 w-full rounded-full bg-primary/10 dark:bg-primary/5">
                         <div className="h-full rounded-full bg-red-500" style={{ width: "125%" }}></div>
                       </div>
 
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Transportation</span>
-                        <span className="text-sm font-medium">₹4,200 / ₹5,000</span>
+                        <span className="text-sm text-muted-foreground dark:text-gray-300">Transportation</span>
+                        <span className="text-sm font-medium dark:text-white">₹4,200 / ₹5,000</span>
                       </div>
-                      <div className="h-2 w-full rounded-full bg-primary/10">
+                      <div className="h-2 w-full rounded-full bg-primary/10 dark:bg-primary/5">
                         <div className="h-full rounded-full bg-green-500" style={{ width: "84%" }}></div>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="h-20 rounded-md bg-primary/20 p-3 flex flex-col justify-between">
-                        <div className="text-xs text-primary/70">Total Budget</div>
-                        <div className="text-lg font-semibold text-primary">₹45,000</div>
+                      <div className="h-20 rounded-md bg-primary/20 dark:bg-primary/10 p-3 flex flex-col justify-between">
+                        <div className="text-xs text-primary/70 dark:text-primary-foreground/70">Total Budget</div>
+                        <div className="text-lg font-semibold text-primary dark:text-primary-foreground">₹45,000</div>
                       </div>
-                      <div className="h-20 rounded-md bg-primary/20 p-3 flex flex-col justify-between">
-                        <div className="text-xs text-primary/70">Remaining</div>
+                      <div className="h-20 rounded-md bg-primary/20 dark:bg-primary/10 p-3 flex flex-col justify-between">
+                        <div className="text-xs text-primary/70 dark:text-primary-foreground/70">Remaining</div>
                         <div className="text-lg font-semibold text-green-500">₹13,300</div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="absolute -bottom-6 -right-6 h-24 w-24 rounded-full bg-primary/10 animate-pulse-slow"></div>
+                <div className="absolute -bottom-6 -right-6 h-24 w-24 rounded-full bg-primary/10 dark:bg-primary/5 animate-pulse-slow"></div>
               </div>
             </div>
           </div>

@@ -1,5 +1,8 @@
 "use client"
 
+import type React from "react"
+
+import { useState } from "react"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
@@ -7,9 +10,62 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { motion } from "framer-motion"
-import { MessageSquare, FileText, HelpCircle, Search } from "lucide-react"
+import { MessageSquare, FileText, HelpCircle, Search, Send, CheckCircle } from "lucide-react"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function SupportPage() {
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const { toast } = useToast()
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setContactForm((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      toast({
+        title: "Search initiated",
+        description: `Searching for "${searchQuery}"`,
+      })
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+
+    setIsSubmitting(false)
+    setSubmitted(true)
+    toast({
+      title: "Message sent!",
+      description: "We'll get back to you as soon as possible.",
+    })
+
+    // Reset form after 3 seconds
+    setTimeout(() => {
+      setSubmitted(false)
+      setContactForm({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      })
+    }, 3000)
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -22,11 +78,22 @@ export default function SupportPage() {
                 Find answers, get support, and share your feedback with our team.
               </p>
               <div className="relative max-w-xl mx-auto mt-6">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-                <Input type="text" placeholder="Search for help articles..." className="pl-10 h-12 rounded-full" />
-                <Button className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full h-10">
-                  Search
-                </Button>
+                <form onSubmit={handleSearch}>
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search for help articles..."
+                    className="pl-10 h-12 rounded-full"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <Button
+                    type="submit"
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full h-10"
+                  >
+                    Search
+                  </Button>
+                </form>
               </div>
             </div>
           </div>
@@ -174,41 +241,93 @@ export default function SupportPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <form className="space-y-4">
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-2">
-                          <label htmlFor="name" className="text-sm font-medium">
-                            Name
-                          </label>
-                          <Input id="name" placeholder="Your name" />
+                    {submitted ? (
+                      <div className="flex flex-col items-center justify-center py-8 text-center">
+                        <div className="h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-400 mb-4">
+                          <CheckCircle className="h-8 w-8" />
+                        </div>
+                        <h3 className="text-xl font-medium mb-2">Message Sent!</h3>
+                        <p className="text-muted-foreground">
+                          Thank you for contacting us. We'll get back to you as soon as possible.
+                        </p>
+                      </div>
+                    ) : (
+                      <form className="space-y-4" onSubmit={handleSubmit}>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="space-y-2">
+                            <label htmlFor="name" className="text-sm font-medium">
+                              Name
+                            </label>
+                            <Input
+                              id="name"
+                              name="name"
+                              placeholder="Your name"
+                              value={contactForm.name}
+                              onChange={handleInputChange}
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label htmlFor="email" className="text-sm font-medium">
+                              Email
+                            </label>
+                            <Input
+                              id="email"
+                              name="email"
+                              type="email"
+                              placeholder="Your email"
+                              value={contactForm.email}
+                              onChange={handleInputChange}
+                              required
+                            />
+                          </div>
                         </div>
                         <div className="space-y-2">
-                          <label htmlFor="email" className="text-sm font-medium">
-                            Email
+                          <label htmlFor="subject" className="text-sm font-medium">
+                            Subject
                           </label>
-                          <Input id="email" type="email" placeholder="Your email" />
+                          <Input
+                            id="subject"
+                            name="subject"
+                            placeholder="How can we help you?"
+                            value={contactForm.subject}
+                            onChange={handleInputChange}
+                            required
+                          />
                         </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label htmlFor="subject" className="text-sm font-medium">
-                          Subject
-                        </label>
-                        <Input id="subject" placeholder="How can we help you?" />
-                      </div>
-                      <div className="space-y-2">
-                        <label htmlFor="message" className="text-sm font-medium">
-                          Message
-                        </label>
-                        <textarea
-                          id="message"
-                          className="min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          placeholder="Please describe your issue or question in detail"
-                        />
-                      </div>
-                      <Button type="submit" className="w-full md:w-auto">
-                        Submit
-                      </Button>
-                    </form>
+                        <div className="space-y-2">
+                          <label htmlFor="message" className="text-sm font-medium">
+                            Message
+                          </label>
+                          <textarea
+                            id="message"
+                            name="message"
+                            className="min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            placeholder="Please describe your issue or question in detail"
+                            value={contactForm.message}
+                            onChange={handleInputChange}
+                            required
+                          />
+                        </div>
+                        <Button
+                          type="submit"
+                          className="w-full md:w-auto flex items-center gap-2"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                              <span>Submitting...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Send className="h-4 w-4" />
+                              <span>Submit</span>
+                            </>
+                          )}
+                        </Button>
+                      </form>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
