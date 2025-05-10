@@ -15,7 +15,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { useToast } from "@/components/ui/use-toast"
 import { cn } from "@/lib/utils"
 import { addExpense } from "@/app/actions/financial-actions"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -43,7 +42,6 @@ export default function AddExpense() {
   const [isLoading, setIsLoading] = useState(false)
   const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null)
 
-  const { toast } = useToast()
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,9 +81,9 @@ export default function AddExpense() {
         setDate(new Date())
 
         // Navigate to transactions after a delay
-        setTimeout(() => {
-          router.push("/transactions")
-        }, 2000)
+        
+      } else {
+        throw new Error(result.message || "Failed to add expense")
       }
     } catch (error) {
       console.error("Error adding expense:", error)
