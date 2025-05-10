@@ -6,7 +6,6 @@ import { adminAuth, adminDb } from "@/lib/firebase-admin"
 import { AUTH_COOKIE_NAME } from "@/lib/auth-cookie"
 import { updateUserConsolidatedCSV } from "@/lib/consolidated-csv-service"
 import { updateLastTransactionTimestamp } from "@/lib/ai-model-integration"
-import { redirect } from "next/navigation"
 
 // Helper function to get the user ID from the auth token
 async function getUserIdFromToken() {
@@ -27,33 +26,33 @@ async function getUserIdFromToken() {
 }
 
 export async function addIncome(formData: FormData) {
-  const userId = await getUserIdFromToken()
-
-  if (!userId) {
-    throw new Error("Unauthorized")
-  }
-
-  const amount = formData.get("amount") as string
-  const description = formData.get("description") as string
-  const date = formData.get("date") as string
-  const category = formData.get("category") as string
-
-  if (!amount || !date) {
-    throw new Error("Missing required fields")
-  }
-
-  const incomeId = uuidv4()
-  const incomeData = {
-    id: incomeId,
-    userId,
-    amount: Number(amount),
-    category: category || "Other",
-    description: description || "",
-    date: date,
-    createdAt: new Date().toISOString(),
-  }
-
   try {
+    const userId = await getUserIdFromToken()
+
+    if (!userId) {
+      return { success: false, message: "Unauthorized" }
+    }
+
+    const amount = formData.get("amount") as string
+    const description = formData.get("description") as string
+    const date = formData.get("date") as string
+    const category = formData.get("category") as string
+
+    if (!amount || !date) {
+      return { success: false, message: "Missing required fields" }
+    }
+
+    const incomeId = uuidv4()
+    const incomeData = {
+      id: incomeId,
+      userId,
+      amount: Number(amount),
+      category: category || "Other",
+      description: description || "",
+      date: date,
+      createdAt: new Date().toISOString(),
+    }
+
     // Add to Firestore
     await adminDb.collection("income").doc(incomeId).set(incomeData)
 
@@ -68,10 +67,12 @@ export async function addIncome(formData: FormData) {
       // Continue even if CSV update fails
     }
 
-    // Redirect to transactions page
-    redirect("/transactions")
+    return { success: true, message: "Income added successfully" }
   } catch (error) {
     console.error("Error adding income:", error)
-    throw new Error("Failed to add income. Please try again.")
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to add income. Please try again.",
+    }
   }
 }

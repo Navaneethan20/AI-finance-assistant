@@ -13,7 +13,6 @@ async function getUserIdFromToken() {
   const authCookie = cookieStore.get(AUTH_COOKIE_NAME)
 
   if (!authCookie) {
-    console.error("No auth cookie found")
     return null
   }
 
@@ -26,111 +25,113 @@ async function getUserIdFromToken() {
   }
 }
 
-// Add expense and update CSV
 export async function addExpense(formData: FormData) {
-  const userId = await getUserIdFromToken()
-
-  if (!userId) {
-    throw new Error("Unauthorized")
-  }
-
-  const amount = formData.get("amount") as string
-  const description = formData.get("description") as string
-  const date = formData.get("date") as string
-  const category = formData.get("category") as string
-
-  if (!amount || !date) {
-    throw new Error("Missing required fields")
-  }
-
-  // Use a simple category prediction based on description
-  let finalCategory = category
-  if (!finalCategory && description) {
-    finalCategory = predictCategory(description)
-  }
-
-  const expenseId = uuidv4()
-  const expenseData = {
-    id: expenseId,
-    userId,
-    amount: Number(amount),
-    category: finalCategory || "Other",
-    description: description || "",
-    date: date,
-    createdAt: new Date().toISOString(),
-  }
-
   try {
+    const userId = await getUserIdFromToken()
+
+    if (!userId) {
+      return { success: false, message: "Unauthorized. Please log in again." }
+    }
+
+    const amount = formData.get("amount") as string
+    const description = formData.get("description") as string
+    const date = formData.get("date") as string
+    const category = formData.get("category") as string
+
+    if (!amount || !date) {
+      return { success: false, message: "Missing required fields" }
+    }
+
+    // Use a simple category prediction based on description
+    let finalCategory = category
+    if (!finalCategory && description) {
+      finalCategory = predictCategory(description)
+    }
+
+    const expenseId = uuidv4()
+    const expenseData = {
+      id: expenseId,
+      userId,
+      amount: Number(amount),
+      category: finalCategory || "Other",
+      description: description || "",
+      date: date,
+      createdAt: new Date().toISOString(),
+    }
+
     // Add to Firestore
     await adminDb.collection("expenses").doc(expenseId).set(expenseData)
 
     // Update the transaction timestamp to invalidate AI analysis cache
     await updateLastTransactionTimestamp(userId)
 
-    // Update the consolidated CSV file in the background
+    // Update the consolidated CSV file
     try {
       await updateUserConsolidatedCSV(userId)
-    } catch (error) {
-      console.error("Error updating consolidated CSV after adding expense:", error)
-      // Continue with the flow even if CSV update fails
+    } catch (csvError) {
+      console.error("Error updating consolidated CSV:", csvError)
+      // Continue even if CSV update fails
     }
 
-    // Return success instead of redirecting
     return { success: true, message: "Expense added successfully" }
   } catch (error) {
     console.error("Error adding expense:", error)
-    throw new Error("Failed to add expense")
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to add expense. Please try again.",
+    }
   }
 }
 
-// Add income and update CSV
 export async function addIncome(formData: FormData) {
-  const userId = await getUserIdFromToken()
-
-  if (!userId) {
-    throw new Error("Unauthorized")
-  }
-
-  const amount = formData.get("amount") as string
-  const description = formData.get("description") as string
-  const date = formData.get("date") as string
-  const category = formData.get("category") as string
-
-  if (!amount || !date) {
-    throw new Error("Missing required fields")
-  }
-
-  const incomeId = uuidv4()
-  const incomeData = {
-    id: incomeId,
-    userId,
-    amount: Number(amount),
-    category: category || "Other",
-    description: description || "",
-    date: date,
-    createdAt: new Date().toISOString(),
-  }
-
   try {
+    const userId = await getUserIdFromToken()
+
+    if (!userId) {
+      return { success: false, message: "Unauthorized. Please log in again." }
+    }
+
+    const amount = formData.get("amount") as string
+    const description = formData.get("description") as string
+    const date = formData.get("date") as string
+    const category = formData.get("category") as string
+
+    if (!amount || !date) {
+      return { success: false, message: "Missing required fields" }
+    }
+
+    const incomeId = uuidv4()
+    const incomeData = {
+      id: incomeId,
+      userId,
+      amount: Number(amount),
+      category: category || "Other",
+      description: description || "",
+      date: date,
+      createdAt: new Date().toISOString(),
+    }
+
     // Add to Firestore
     await adminDb.collection("income").doc(incomeId).set(incomeData)
 
     // Update the transaction timestamp to invalidate AI analysis cache
     await updateLastTransactionTimestamp(userId)
 
-    // Update the consolidated CSV file in the background
+    // Update the consolidated CSV file
     try {
       await updateUserConsolidatedCSV(userId)
-    } catch (error) {
-      console.error("Error updating consolidated CSV after adding income:", error)
-      // Continue with the flow even if CSV update fails
+    } catch (csvError) {
+      console.error("Error updating consolidated CSV:", csvError)
+      // Continue even if CSV update fails
     }
 
-    // Return success instead of redirecting
     return { success: true, message: "Income added successfully" }
   } catch (error) {
     console.error("Error adding income:", error)
-    throw new Error("Failed to add income")
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to add income. Please try again.",
+    }
   }
 }
 
@@ -141,9 +142,6 @@ function predictCategory(description: string): string {
   if (
     lowerDesc.includes("food") ||
     lowerDesc.includes("restaurant") ||
-    lowerDesc.includes("cafe") ||
-    lowerDesc.includes("lunch") ||
-    lowerDesc.includes("dinner") ||
     lowerDesc.includes("cafe") ||
     lowerDesc.includes("lunch") ||
     lowerDesc.includes("dinner")

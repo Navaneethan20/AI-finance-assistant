@@ -26,20 +26,20 @@ async function getUserIdFromToken() {
 
 // Delete a single transaction
 export async function deleteTransaction(formData: FormData) {
-  const userId = await getUserIdFromToken()
-
-  if (!userId) {
-    throw new Error("Unauthorized")
-  }
-
-  const transactionId = formData.get("transactionId") as string
-  const transactionType = formData.get("transactionType") as string
-
-  if (!transactionId || !transactionType) {
-    throw new Error("Missing required fields")
-  }
-
   try {
+    const userId = await getUserIdFromToken()
+
+    if (!userId) {
+      return { success: false, message: "Unauthorized. Please log in again." }
+    }
+
+    const transactionId = formData.get("transactionId") as string
+    const transactionType = formData.get("transactionType") as string
+
+    if (!transactionId || !transactionType) {
+      return { success: false, message: "Missing required fields" }
+    }
+
     // Delete from Firestore
     const collectionName = transactionType === "expense" ? "expenses" : "income"
     await adminDb.collection(collectionName).doc(transactionId).delete()
@@ -50,31 +50,34 @@ export async function deleteTransaction(formData: FormData) {
     return { success: true, message: "Transaction deleted successfully" }
   } catch (error) {
     console.error("Error deleting transaction:", error)
-    throw new Error("Failed to delete transaction")
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to delete transaction. Please try again.",
+    }
   }
 }
 
 // Delete multiple transactions
 export async function deleteMultipleTransactions(formData: FormData) {
-  const userId = await getUserIdFromToken()
-
-  if (!userId) {
-    throw new Error("Unauthorized")
-  }
-
-  const transactionIds = formData.get("transactionIds") as string
-  const transactionTypes = formData.get("transactionTypes") as string
-
-  if (!transactionIds || !transactionTypes) {
-    throw new Error("Missing required fields")
-  }
-
   try {
+    const userId = await getUserIdFromToken()
+
+    if (!userId) {
+      return { success: false, message: "Unauthorized. Please log in again." }
+    }
+
+    const transactionIds = formData.get("transactionIds") as string
+    const transactionTypes = formData.get("transactionTypes") as string
+
+    if (!transactionIds || !transactionTypes) {
+      return { success: false, message: "Missing required fields" }
+    }
+
     const ids = JSON.parse(transactionIds) as string[]
     const types = JSON.parse(transactionTypes) as string[]
 
     if (ids.length !== types.length) {
-      throw new Error("Transaction IDs and types must have the same length")
+      return { success: false, message: "Transaction IDs and types must have the same length" }
     }
 
     // Create a batch for efficient writes
@@ -96,19 +99,22 @@ export async function deleteMultipleTransactions(formData: FormData) {
     return { success: true, message: `${ids.length} transactions deleted successfully` }
   } catch (error) {
     console.error("Error deleting multiple transactions:", error)
-    throw new Error("Failed to delete transactions")
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to delete transactions. Please try again.",
+    }
   }
 }
 
 // Delete all transactions for a user
 export async function deleteAllTransactions(formData: FormData) {
-  const userId = await getUserIdFromToken()
-
-  if (!userId) {
-    throw new Error("Unauthorized")
-  }
-
   try {
+    const userId = await getUserIdFromToken()
+
+    if (!userId) {
+      return { success: false, message: "Unauthorized. Please log in again." }
+    }
+
     // Delete all expenses
     const expensesSnapshot = await adminDb.collection("expenses").where("userId", "==", userId).get()
     const expensesBatch = adminDb.batch()
@@ -134,6 +140,9 @@ export async function deleteAllTransactions(formData: FormData) {
     }
   } catch (error) {
     console.error("Error deleting all transactions:", error)
-    throw new Error("Failed to delete all transactions")
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to delete all transactions. Please try again.",
+    }
   }
 }

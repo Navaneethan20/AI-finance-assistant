@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore"
 import { format } from "date-fns"
-import { Download, ArrowUpDown, Trash2, CheckSquare, Square, AlertTriangle } from "lucide-react"
+import { Download, ArrowUpDown, Trash2, CheckSquare, Square, AlertTriangle, AlertCircle } from "lucide-react"
 import { AuthenticatedLayout } from "@/components/authenticated-layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog"
 import { deleteTransaction, deleteMultipleTransactions, deleteAllTransactions } from "@/app/actions/transaction-actions"
 import { UnifiedLoader } from "@/components/ui/unified-loader"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface Transaction {
   id: string
@@ -49,6 +50,7 @@ export default function Transactions() {
   const [isDeletingAll, setIsDeletingAll] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const { user } = useAuth()
   const { toast } = useToast()
@@ -76,6 +78,7 @@ export default function Transactions() {
 
       try {
         setIsLoading(true)
+        setError(null)
 
         // Fetch expenses
         const expensesQuery = query(
@@ -120,6 +123,7 @@ export default function Transactions() {
         setIsAllSelected(false)
       } catch (error) {
         console.error("Error fetching transactions:", error)
+        setError("Failed to load transactions. Please try refreshing the page.")
         toast({
           title: "Error",
           description: "Failed to load transactions",
@@ -211,6 +215,7 @@ export default function Transactions() {
   const handleDeleteTransaction = async (id: string, type: string) => {
     try {
       setIsDeleting(true)
+      setError(null)
 
       const formData = new FormData()
       formData.append("transactionId", id)
@@ -225,9 +230,12 @@ export default function Transactions() {
           title: "Success",
           description: result.message,
         })
+      } else {
+        throw new Error(result.message || "Failed to delete transaction")
       }
     } catch (error) {
       console.error("Error deleting transaction:", error)
+      setError("Failed to delete transaction. Please try again.")
       toast({
         title: "Error",
         description: "Failed to delete transaction",
@@ -243,6 +251,7 @@ export default function Transactions() {
 
     try {
       setIsDeleting(true)
+      setError(null)
 
       const transactionIds = selectedTransactions
       const transactionTypes = selectedTransactions.map((id) => {
@@ -265,9 +274,12 @@ export default function Transactions() {
           title: "Success",
           description: result.message,
         })
+      } else {
+        throw new Error(result.message || "Failed to delete selected transactions")
       }
     } catch (error) {
       console.error("Error deleting transactions:", error)
+      setError("Failed to delete selected transactions. Please try again.")
       toast({
         title: "Error",
         description: "Failed to delete selected transactions",
@@ -281,6 +293,7 @@ export default function Transactions() {
   const handleDeleteAll = async () => {
     try {
       setIsDeletingAll(true)
+      setError(null)
 
       const formData = new FormData()
       const result = await deleteAllTransactions(formData)
@@ -294,9 +307,12 @@ export default function Transactions() {
           title: "Success",
           description: result.message,
         })
+      } else {
+        throw new Error(result.message || "Failed to delete all transactions")
       }
     } catch (error) {
       console.error("Error deleting all transactions:", error)
+      setError("Failed to delete all transactions. Please try again.")
       toast({
         title: "Error",
         description: "Failed to delete all transactions",
@@ -314,6 +330,14 @@ export default function Transactions() {
           <h1 className="text-3xl font-bold tracking-tight">Transactions</h1>
           <p className="text-muted-foreground">View and manage your transaction history</p>
         </div>
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         <Card>
           <CardHeader>
@@ -436,11 +460,7 @@ export default function Transactions() {
                           ></span>
                           {transaction.type}
                         </TableCell>
-                        <TableCell>
-                          {transaction.date && !isNaN(new Date(transaction.date).getTime())
-                            ? format(new Date(transaction.date), "dd MMM yyyy")
-                            : "Invalid Date"}
-                        </TableCell>
+                        <TableCell>{format(new Date(transaction.date), "dd MMM yyyy")}</TableCell>
                         <TableCell>{transaction.category}</TableCell>
                         <TableCell className="max-w-[200px] truncate">{transaction.description || "-"}</TableCell>
                         <TableCell

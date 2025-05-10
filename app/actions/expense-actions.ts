@@ -1,7 +1,6 @@
 "use server"
 
 import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
 import { v4 as uuidv4 } from "uuid"
 import { adminAuth, adminDb } from "@/lib/firebase-admin"
 import { AUTH_COOKIE_NAME } from "@/lib/auth-cookie"
@@ -27,39 +26,39 @@ async function getUserIdFromToken() {
 }
 
 export async function addExpense(formData: FormData) {
-  const userId = await getUserIdFromToken()
-
-  if (!userId) {
-    throw new Error("Unauthorized")
-  }
-
-  const amount = formData.get("amount") as string
-  const description = formData.get("description") as string
-  const date = formData.get("date") as string
-  const category = formData.get("category") as string
-
-  if (!amount || !date) {
-    throw new Error("Missing required fields")
-  }
-
-  // Use a simple category prediction based on description
-  let finalCategory = category
-  if (!finalCategory && description) {
-    finalCategory = predictCategory(description)
-  }
-
-  const expenseId = uuidv4()
-  const expenseData = {
-    id: expenseId,
-    userId,
-    amount: Number(amount),
-    category: finalCategory || "Other",
-    description: description || "",
-    date: date,
-    createdAt: new Date().toISOString(),
-  }
-
   try {
+    const userId = await getUserIdFromToken()
+
+    if (!userId) {
+      return { success: false, message: "Unauthorized" }
+    }
+
+    const amount = formData.get("amount") as string
+    const description = formData.get("description") as string
+    const date = formData.get("date") as string
+    const category = formData.get("category") as string
+
+    if (!amount || !date) {
+      return { success: false, message: "Missing required fields" }
+    }
+
+    // Use a simple category prediction based on description
+    let finalCategory = category
+    if (!finalCategory && description) {
+      finalCategory = predictCategory(description)
+    }
+
+    const expenseId = uuidv4()
+    const expenseData = {
+      id: expenseId,
+      userId,
+      amount: Number(amount),
+      category: finalCategory || "Other",
+      description: description || "",
+      date: date,
+      createdAt: new Date().toISOString(),
+    }
+
     // Add to Firestore
     await adminDb.collection("expenses").doc(expenseId).set(expenseData)
 
@@ -74,14 +73,13 @@ export async function addExpense(formData: FormData) {
       // Continue even if CSV update fails
     }
 
-    // Redirect to transactions page
-    redirect("/transactions")
+    return { success: true, message: "Expense added successfully" }
   } catch (error) {
     console.error("Error adding expense:", error)
-    \
-    throw new Error("Failed to add expense.  {
-    console.error("Error adding expense:", error)
-    throw new Error("Failed to add expense. Please try again.")
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to add expense. Please try again.",
+    }
   }
 }
 
