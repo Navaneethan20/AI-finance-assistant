@@ -6,29 +6,17 @@ const apps = admin.apps
 // Initialize Firebase Admin if not already initialized
 if (!apps.length) {
   try {
-    // Handle the private key format properly
-    let privateKey = process.env.FIREBASE_PRIVATE_KEY
-
-    // If the key starts with quotation marks, remove them
-    if (privateKey && privateKey.startsWith('"') && privateKey.endsWith('"')) {
-      privateKey = privateKey.slice(1, -1)
-    }
-
-    // Replace escaped newlines with actual newlines
-    if (privateKey) {
-      privateKey = privateKey.replace(/\\n/g, "\n")
-    }
-
-    // Create the credential object
-    const credential = {
+    // Get the service account credentials
+    const serviceAccount = {
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: privateKey,
+      // Handle the private key format properly
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
     }
 
-    // Initialize the app
+    // Initialize the app with the service account
     admin.initializeApp({
-      credential: admin.credential.cert(credential),
+      credential: admin.credential.cert(serviceAccount),
       storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
     })
 
@@ -36,15 +24,14 @@ if (!apps.length) {
   } catch (error) {
     console.error("Firebase Admin initialization error:", error)
 
-    // Log more details about the private key for debugging
-    // Be careful not to expose the actual key in production logs
-    if (process.env.NODE_ENV !== "production") {
-      const privateKeyStart = process.env.FIREBASE_PRIVATE_KEY?.substring(0, 15)
-      console.error(`Private key starts with: ${privateKeyStart}...`)
-      console.error(`Private key length: ${process.env.FIREBASE_PRIVATE_KEY?.length}`)
+    // Log more details about the environment for debugging
+    console.error(`Project ID: ${process.env.FIREBASE_PROJECT_ID}`)
+    console.error(`Client Email: ${process.env.FIREBASE_CLIENT_EMAIL}`)
+    console.error(`Private Key exists: ${Boolean(process.env.FIREBASE_PRIVATE_KEY)}`)
+    if (process.env.FIREBASE_PRIVATE_KEY) {
+      console.error(`Private Key length: ${process.env.FIREBASE_PRIVATE_KEY.length}`)
+      console.error(`Private Key starts with: ${process.env.FIREBASE_PRIVATE_KEY.substring(0, 30)}...`)
     }
-
-    throw new Error(`Firebase initialization failed: ${error instanceof Error ? error.message : String(error)}`)
   }
 }
 
