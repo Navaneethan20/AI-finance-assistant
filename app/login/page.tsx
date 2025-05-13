@@ -34,8 +34,9 @@ export default function Login() {
   const [errors, setErrors] = useState<Partial<LoginFormData>>({})
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [error, setError] = useState("")
-  const { signIn, signInWithGoogle } = useAuth()
+  const { signIn, signInWithGoogle, user } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
 
@@ -71,12 +72,29 @@ export default function Login() {
   // Function to trigger AI analysis after login
   const triggerAIAnalysis = async (userId: string) => {
     try {
+      console.log("Starting AI analysis for user:", userId)
+      setIsAnalyzing(true)
+
+      // Show toast for analysis
+      toast({
+        title: "Analyzing your data",
+        description: "We're analyzing your financial data to provide personalized insights.",
+      })
+
       // Trigger AI analysis in the background
-      await getAIAnalysis(userId, true)
-      console.log("AI analysis triggered after login")
+      const analysisResult = await getAIAnalysis(userId, true)
+      console.log("AI analysis completed:", analysisResult ? "Success" : "Failed")
+
+      // Show completion toast
+      toast({
+        title: "Analysis complete",
+        description: "Your financial insights are ready to view.",
+      })
     } catch (error) {
       console.error("Error triggering AI analysis:", error)
       // Don't show error to user as this is a background task
+    } finally {
+      setIsAnalyzing(false)
     }
   }
 
@@ -93,22 +111,19 @@ export default function Login() {
       setIsLoading(true)
       const userCredential = await signIn(formData.email, formData.password)
 
-      // Trigger AI analysis immediately after successful login
-      if (userCredential?.user?.uid) {
-        // Set loading state for AI analysis
-        toast({
-          title: "Analyzing your data",
-          description: "We're analyzing your financial data to provide personalized insights.",
-        })
-
-        // Force refresh the AI analysis
-        triggerAIAnalysis(userCredential.user.uid)
-      }
-
       toast({
         title: "Success",
         description: "You have been logged in successfully",
       })
+
+      // Trigger AI analysis immediately after successful login
+      if (userCredential?.user?.uid) {
+        console.log("Login successful, triggering analysis for user:", userCredential.user.uid)
+        // We'll trigger the analysis but not wait for it to complete
+        triggerAIAnalysis(userCredential.user.uid)
+      } else {
+        console.error("User credential or UID is missing after login")
+      }
 
       router.push("/dashboard")
     } catch (error) {
@@ -124,24 +139,21 @@ export default function Login() {
     try {
       setIsGoogleLoading(true)
       setError("")
-      const userCredential = await signInWithGoogle()
-
-      // Trigger AI analysis immediately after successful Google login
-      if (userCredential?.user?.uid) {
-        // Set loading state for AI analysis
-        toast({
-          title: "Analyzing your data",
-          description: "We're analyzing your financial data to provide personalized insights.",
-        })
-
-        // Force refresh the AI analysis
-        triggerAIAnalysis(userCredential.user.uid)
-      }
+      const user = await signInWithGoogle()
 
       toast({
         title: "Success",
         description: "You have been logged in successfully with Google",
       })
+
+      // Trigger AI analysis immediately after successful Google login
+      if (user?.uid) {
+        console.log("Google login successful, triggering analysis for user:", user.uid)
+        // We'll trigger the analysis but not wait for it to complete
+        triggerAIAnalysis(user.uid)
+      } else {
+        console.error("User or UID is missing after Google login")
+      }
 
       router.push("/dashboard")
     } catch (error) {
@@ -313,8 +325,8 @@ export default function Login() {
         </motion.div>
       </main>
       <Footer />
-      {isLoading && <PageLoader message="Signing in..." />}
-      {isGoogleLoading && <PageLoader message="Signing in with Google..." />}
+      {(isLoading || isGoogleLoading) && <PageLoader message="Signing in..." />}
+      {isAnalyzing && <PageLoader message="Analyzing your financial data..." />}
     </div>
   )
 }

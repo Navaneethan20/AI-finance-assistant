@@ -5,6 +5,7 @@ import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
 import {
   type User,
+  type UserCredential,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -23,7 +24,7 @@ interface AuthContextType {
   user: User | null
   loading: boolean
   signUp: (email: string, password: string, firstName: string, lastName: string, phone: string) => Promise<void>
-  signIn: (email: string, password: string) => Promise<void>
+  signIn: (email: string, password: string) => Promise<UserCredential>
   signInWithGoogle: () => Promise<User>
   logout: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
@@ -98,12 +99,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<UserCredential> => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       // Set auth cookie
       const token = await userCredential.user.getIdToken()
       setAuthCookie(token)
+      return userCredential
     } catch (error) {
       console.error("Error signing in:", error)
       throw error
