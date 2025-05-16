@@ -78,11 +78,16 @@ export default function Dashboard() {
           const recentTransactions: any[] = []
           recentTransactionsSnapshot.forEach((doc) => {
             const data = doc.data()
+            let formattedDate = "Invalid date"
+            if (data.date) {
+              const d = new Date(data.date)
+              formattedDate = isNaN(d.getTime()) ? "Invalid date" : format(d, "dd MMM yyyy")
+            }
             recentTransactions.push({
               id: doc.id,
               description: data.description || data.category,
               amount: data.amount,
-              date: format(new Date(data.date), "dd MMM yyyy"),
+              date: formattedDate,
               type: "expense",
             })
           })
@@ -97,11 +102,16 @@ export default function Dashboard() {
           const recentIncomeSnapshot = await getDocs(recentIncomeQuery)
           recentIncomeSnapshot.forEach((doc) => {
             const data = doc.data()
+            let formattedDate = "Invalid date"
+            if (data.date) {
+              const d = new Date(data.date)
+              formattedDate = isNaN(d.getTime()) ? "Invalid date" : format(d, "dd MMM yyyy")
+            }
             recentTransactions.push({
               id: doc.id,
               description: data.source || "Income",
               amount: data.amount,
-              date: format(new Date(data.date), "dd MMM yyyy"),
+              date: formattedDate,
               type: "income",
             })
           })

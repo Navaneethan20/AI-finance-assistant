@@ -460,7 +460,11 @@ export default function Transactions() {
                           ></span>
                           {transaction.type}
                         </TableCell>
-                        <TableCell>{format(new Date(transaction.date), "dd MMM yyyy")}</TableCell>
+                        <TableCell>
+                          {transaction.date && !isNaN(new Date(transaction.date).getTime())
+                            ? format(new Date(transaction.date), "dd MMM yyyy")
+                            : "Invalid Date"}
+                        </TableCell>
                         <TableCell>{transaction.category}</TableCell>
                         <TableCell className="max-w-[200px] truncate">{transaction.description || "-"}</TableCell>
                         <TableCell
