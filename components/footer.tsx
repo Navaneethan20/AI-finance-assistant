@@ -7,7 +7,7 @@ export function Footer() {
   return (
     <footer className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container py-8 md:py-12">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="flex flex-wrap justify-between gap-8 md:grid md:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col gap-4">
             <Logo />
             <p className="text-sm text-muted-foreground max-w-xs">

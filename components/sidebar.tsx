@@ -207,7 +207,7 @@ export function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
                 variant="outline"
                 size="icon"
                 onClick={toggleSidebar}
-                className="fixed left-4 top-20 z-30 hidden lg:flex"
+                className="fixed left-4 top-20 z-30 flex lg:flex "
               >
                 <ChevronRight size={16} />
               </Button>
@@ -218,6 +218,7 @@ export function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
           </Tooltip>
         </TooltipProvider>
       )}
+
     </>
   )
 }
