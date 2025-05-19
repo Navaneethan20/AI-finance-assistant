@@ -1289,73 +1289,7 @@ export default function BudgetInsights() {
               )}
 
               {/* Upcoming Bills */}
-              {!isLoading && (
-                <motion.div initial="hidden" animate="visible" variants={fadeIn}>
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                        <Calendar className="h-4 w-4 text-primary" />
-                        Upcoming Bills
-                      </CardTitle>
-                      <CardDescription className="text-xs">
-                        Expected bills based on your spending patterns
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {getUpcomingBills().length > 0 ? (
-                        <div className="space-y-3">
-                          {getUpcomingBills().map((bill, index) => (
-                            <motion.div
-                              key={index}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                              className="flex items-center justify-between p-2 bg-muted/50 rounded-lg"
-                            >
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                                    getDaysUntil(bill.dueDate) <= 3
-                                      ? "bg-red-100 text-red-600"
-                                      : "bg-blue-100 text-blue-600"
-                                  }`}
-                                >
-                                  <Clock className="h-4 w-4" />
-                                </div>
-                                <div>
-                                  <h4 className="font-medium text-sm">{bill.name}</h4>
-                                  <p className="text-xs text-muted-foreground">Due {formatDate(bill.dueDate)}</p>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <p className="font-semibold text-sm">₹{bill.amount.toLocaleString()}</p>
-                                <Badge
-                                  variant={getDaysUntil(bill.dueDate) <= 3 ? "destructive" : "outline"}
-                                  className="mt-1 text-[10px] px-1 py-0"
-                                >
-                                  {getDaysUntil(bill.dueDate) <= 0
-                                    ? "Due today"
-                                    : `${getDaysUntil(bill.dueDate)} days left`}
-                                </Badge>
-                              </div>
-                            </motion.div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center py-6 text-center">
-                          <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center mb-3">
-                            <Calendar className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                          <h3 className="text-sm font-medium">No upcoming bills</h3>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Add regular expenses to see your upcoming bills here
-                          </p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )}
+              
             </div>
           )}
 
